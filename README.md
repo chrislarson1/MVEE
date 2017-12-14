@@ -1,4 +1,4 @@
-# work_sample
+# MVEE Algorithm
 Description: this program finds an affine hull of points sampled from the locuses of two ellipses. Ellipses are defined in main.cpp using the set: {a, b, x0, y0, phi}.
 
 Dependencies are Eigen (v3) and Boost (v1.63), see Makefile for details. There is also binary in build/bin/ that was compiled on a macbook air (~2013). 
