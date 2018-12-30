@@ -18,21 +18,23 @@ CXXFLAGS := --std=c++11 $(OPTFLAGS)
 LDFLAGS := \
 -L/usr/lib \
 -L/usr/local/lib \
--L/usr/local/Cellar/boost/1.63.0/include
+-L/usr/lib/x86_64-linux-gnu
 
 INCLUDES := \
 -I$(ROOTDIR)/include \
 -I/usr/include \
 -I/usr/local/include \
--I/usr/local/include/eigen3 \
--I/usr/local/Cellar/boost/1.63.0/lib
+-I/usr/include/eigen3 \
+-I/usr/include/boost
 
 LIBS := \
 -lstdc++ \
 -lboost_system \
 -lboost_chrono \
--lboost_thread-mt \
--lboost_filesystem
+-lboost_thread \
+-lboost_filesystem \
+-lm \
+-lpthread
 
 # Source file
 SRC := \
