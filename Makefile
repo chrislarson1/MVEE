@@ -3,13 +3,14 @@
 
 # Local directories
 ROOTDIR := $(shell pwd)
+TESTDIR := $(ROOTDIR)/tests
 BUILDDIR := $(ROOTDIR)/build
 OBJDIR := $(BUILDDIR)/obj
 LIBDIR := $(BUILDDIR)/lib
 BINDIR := $(BUILDDIR)/bin
 
 # Program name
-EXECUTABLE := $(BINDIR)/MVEE
+SHARED_LIB := $(LIBDIR)/libmvee.so
 
 # Compiler setup
 CXX := gcc
@@ -38,14 +39,14 @@ LIBS := \
 
 # Source file
 SRC := \
-$(ROOTDIR)/src/main.cpp
+$(ROOTDIR)/src/mvee.cpp
 
 # Intermediate object filenames
 OBJ := \
 $(SRC:.c=$(BUILD_DIR)/.o)
 
 # Resulting compilation rule
-$(EXECUTABLE): $(OBJ)
+$(SHARED_LIB): $(OBJ)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) \
 	-o $@ $^ $(LDFLAGS) $(LIBS)

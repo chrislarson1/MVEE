@@ -1,8 +1,10 @@
-//
-//  main.cpp
-//  Minimum Volume Enclosing Ellipsoid Problem
-//  Chris larson (2017)
-//
+/**
+    test_mvee.cpp
+    Desc: tests for mvee class
+    @author Chris Larson 
+    @date (2017)
+    @version 1.0
+**/
 
 #include <iostream>
 #include <stdio.h>
@@ -18,15 +20,15 @@
 #include <Eigen/Dense>
 #include "boost/chrono.hpp"
 #include "boost/filesystem.hpp"
+#include "mvee.hpp"
+#include "utils.hpp"
 
 #define PI 3.14159265
 #define EPS 1e-2
 #define N 10
 #define RUNS 10
 
-using namespace std;
-using namespace chrono;
-using namespace Eigen;
+
 
 
 // Set of random ellipses
@@ -85,6 +87,15 @@ void find_max(VectorXd &vec, double &max_elem, int &max_ind)
     }
 }
 
+void bounding_ellipse(MatrixXd &V, VectorXd &svals, VectorXd &xhat, double (&be)[5])
+{
+    be[2] = xhat(0);
+    be[3] = xhat(1);
+    be[0] = 1 / sqrt(svals(0));
+    be[1] = 1 / sqrt(svals(1));
+    be[4] = acos(V(0, 0));
+}
+
 
 void decomp(MatrixXd &A, VectorXd &s, MatrixXd &U, MatrixXd &V, string type)
 {
@@ -102,15 +113,6 @@ void decomp(MatrixXd &A, VectorXd &s, MatrixXd &U, MatrixXd &V, string type)
     }
 }
 
-
-void bounding_ellipse(MatrixXd &V, VectorXd &svals, VectorXd &xhat, double (&be)[5])
-{
-    be[2] = xhat(0);
-    be[3] = xhat(1);
-    be[0] = 1 / sqrt(svals(0));
-    be[1] = 1 / sqrt(svals(1));
-    be[4] = acos(V(0, 0));
-}
 
 
 void MVEE(double (&e1)[5], double (&e2)[5], double (&be)[5], double &t, int &it, int num_points, double eps)
