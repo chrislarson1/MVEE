@@ -1,9 +1,8 @@
 # MVEE Algorithm
-Description: this program finds an affine hull of points in a dataset.
+Description:  <br/>
 
-Dependencies are Eigen3 and Boost, see Makefile for details. 
+Dependencies are Eigen3 and Boost, see Makefile for details.  <br/>
+Refer to include/mvee.hpp and tests/test.cpp for usage details. <br/>
 
-plot.py plots the outputs from functions experiment1 and experiment2 defined in main.cpp, the outputs can be found in outputs/ and analysis/ respectively.
-
-To run program:
-$ ./build/bin/MVEE
+To install run: <br/>
+$ make && sudo make install
