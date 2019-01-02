@@ -29,6 +29,25 @@
 #define RUNS 10
 
 
+int test_irregular_ellipses()
+{
+    return 0;
+}
+
+
+int test_multivariate_guassian()
+{
+    return 0;
+}
+
+
+
+
+
+int test_outliers()
+{
+    return 0;
+}
 
 
 // Set of random ellipses

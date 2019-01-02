@@ -31,9 +31,10 @@ private:
 			 	   Eigen::MatrixXd&, 
 			 	   Eigen::MatrixXd&);
 
-	void mvee(Eigen::MatrixXd&, double);
+	void run(Eigen::MatrixXd&, double);
 
 public:
+	
 	Mvee();
 
 	double time;

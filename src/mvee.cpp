@@ -28,7 +28,7 @@ using namespace Eigen;
 using namespace mvee;
 
 
-Mvee::Mvee() {};
+Mvee::Mvee() {}
 
 
 void Mvee::decompose(MatrixXd& A, VectorXd& s, MatrixXd& U, MatrixXd& V)
@@ -46,7 +46,7 @@ void Mvee::decompose(MatrixXd& A, VectorXd& s, MatrixXd& U, MatrixXd& V)
     @param eps: approximation error (default: 0.001)
     Ref: Khachiyan (1979)
 */
-void Mvee::mvee(MatrixXd& data, double eps)
+void Mvee::run(MatrixXd& data, double eps)
 {
     // Khachiyan's algorithm
     auto t0 = chrono::system_clock::now();    
@@ -109,7 +109,7 @@ void Mvee::mvee(MatrixXd& data, double eps)
 void Mvee::compute(string file, char delim, double eps)
 {
     MatrixXd D = readCSV(file, delim);
-    mvee(D, eps);
+    run(D, eps);
 }
 
 
@@ -131,7 +131,7 @@ void Mvee::compute(vector<vector<double>>& data, double eps)
             D(i, j) = data[i][j];
         }
     }
-    mvee(D, eps);
+    run(D, eps);
 }
 
 
@@ -143,7 +143,7 @@ void Mvee::compute(vector<vector<double>>& data, double eps)
 */
 void Mvee::compute(MatrixXd& data, double eps)
 {
-    mvee(data, eps);
+    run(data, eps);
 }
 
 
@@ -183,7 +183,7 @@ vector<vector<double>> Mvee::pose()
 }
 
 
-Mvee::~Mvee() {};
+Mvee::~Mvee() {}
 
 
 int main()

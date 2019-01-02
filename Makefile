@@ -1,33 +1,27 @@
 # Makefile for MVEE
 # Author: Chris Larson (2017)
 
-# Local directories
+# DIRECTORIES
 ROOTDIR := $(shell pwd)
-TESTDIR := $(ROOTDIR)/tests
 BUILDDIR := $(ROOTDIR)/build
 OBJDIR := $(BUILDDIR)/obj
 LIBDIR := $(BUILDDIR)/lib
 BINDIR := $(BUILDDIR)/bin
+PREFIX := /usr/local
 
-# Program name
-SHARED_LIB := $(LIBDIR)/libmvee.so
-
-# Compiler setup
+# COMPILER FLAGS
 CXX := gcc
-OPTFLAGS := -o0
-CXXFLAGS := --std=c++11 $(OPTFLAGS)
+CXXFLAGS := -fPIC --std=c++11 -o0 -g
 LDFLAGS := \
 -L/usr/lib \
 -L/usr/local/lib \
 -L/usr/lib/x86_64-linux-gnu
-
 INCLUDES := \
 -I$(ROOTDIR)/include \
 -I/usr/include \
 -I/usr/local/include \
 -I/usr/include/eigen3 \
 -I/usr/include/boost
-
 LIBS := \
 -lstdc++ \
 -lboost_system \
@@ -37,22 +31,37 @@ LIBS := \
 -lm \
 -lpthread
 
-# Source file
-SRC := \
-$(ROOTDIR)/src/mvee.cpp
+# SHARED LIB
+SHARED_LIB := $(LIBDIR)/libmvee.so
 
-# Intermediate object filenames
-OBJ := \
-$(SRC:.c=$(BUILD_DIR)/.o)
+# SOURCES
+SRC := $(ROOTDIR)/src/mvee.cpp
 
-# Resulting compilation rule
+# OBJECTS
+OBJ := $(SRC:.c=$(OBJDIR)/.o)
+
+# COMPILATION RULE
 $(SHARED_LIB): $(OBJ)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) \
+	$(CXX) -shared -fPIC $(CXXFLAGS) $(INCLUDES) \
 	-o $@ $^ $(LDFLAGS) $(LIBS)
 
-# Cleanup
+# CLEAN
 .PHONY: clean
-
 clean:
 	rm -rf $(BUILDDIR)/*
+
+# INSTALL
+.PHONY: install
+install: $(SHARED_LIB)
+	cp $(SHARED_LIB) $(DESTDIR)$(PREFIX)/lib/libmvee.so
+	chmod 644 $(DESTDIR)$(PREFIX)/lib/libmvee.so
+	mkdir -p $(DESTDIR)$(PREFIX)/include/mvee
+	cp include/mvee.hpp $(DESTDIR)$(PREFIX)/include/mvee/mvee.hpp
+	cp include/utils.hpp $(DESTDIR)$(PREFIX)/include/mvee/utils.hpp
+
+# UNINSTALL
+.PHONY: uninstall
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/lib/libmvee.so
+	rm -r -f $(DESTDIR)$(PREFIX)/include/mvee
