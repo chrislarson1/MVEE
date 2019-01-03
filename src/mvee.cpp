@@ -11,15 +11,13 @@
 #include <stdlib.h>
 #include <fstream>
 #include <algorithm>
+#include <exception>
 #include <string>
 #include <map>
 #include <cmath>
-#include <thread>
-#include <future>
 #include <vector>
 #include <Eigen/Dense>
 #include "boost/chrono.hpp"
-#include "boost/filesystem.hpp"
 #include "mvee.hpp"
 #include "utils.hpp"
 
@@ -41,21 +39,24 @@ void Mvee::decompose(MatrixXd& A, VectorXd& s, MatrixXd& U, MatrixXd& V)
 
 
 /*
-    Ellipsoid method
+    Khachiyan's ellipsoid method
     @param X: matrix of data (n x d)
     @param eps: approximation error (default: 0.001)
+    @param lmcoeff: Levenberg-Marquardt coefficient 
+                    used for inverting ill-condditioned
+                    matrices. (default: 1e-8)
     Ref: Khachiyan (1979)
 */
-void Mvee::run(MatrixXd& data, double eps)
+void Mvee::khachiyan(MatrixXd& data, double eps, double lmcoeff)
 {
     // Khachiyan's algorithm
     auto t0 = chrono::system_clock::now();    
     iters = 0; 
     long double err = INFINITY; 
     double alpha;
-    long int n = data.rows();
-    long int d = data.cols();
-    MatrixXd X = data.inverse();
+    int n = data.rows();
+    int d = data.cols();
+    MatrixXd X = data.transpose();
     MatrixXd Q(X.rows() + 1, X.cols());
     Q.row(0) = X.row(0);
     Q.row(1) = X.row(1);
@@ -63,17 +64,18 @@ void Mvee::run(MatrixXd& data, double eps)
     VectorXd u = (1 / (double) n) * VectorXd::Ones(n);
     VectorXd uhat = u;
     MatrixXd G(d + 1, d + 1);
+    MatrixXd noiseye = MatrixXd::Identity(G.rows(), G.cols()) * lmcoeff;
     VectorXd g(n);
-    double m = -1; 
-    double j = -1;
+    double m; int i;
     while (err > eps)
     {
-        G = Q * u.asDiagonal() * Q.transpose();
+        G = Q * u.asDiagonal() * Q.transpose() + noiseye;
         g = (Q.transpose() * G.inverse() * Q).diagonal();
-        findMaxIdx(g);
+        m = g.maxCoeff();
+        i = findIdx(g, m);
         alpha = (m - d - 1) / ((d + 1) * (m - 1));
         uhat = (1 - alpha) * u;
-        uhat(j) = uhat(j) + alpha;
+        uhat(i) += alpha;
         err = (uhat - u).norm();
         u = uhat;
         iters++;
@@ -94,9 +96,9 @@ void Mvee::run(MatrixXd& data, double eps)
     decompose(E, s, U, V);
 
     // Cache result
-    _centroid = convertVec(x, [](double z) { return z; });
-    _radii    = convertVec(s, [](double z) { return 1 / sqrt(z); });
-    _pose     = convertMat(V, [](double z) { return z; });
+    _centroid = toStdVec(x, [](double z) { return z; });
+    _radii    = toStdVec(s, [](double z) { return 1 / sqrt(z); });
+    _pose     = toStdMat(V, [](double z) { return z; });
 }
 
 
@@ -106,10 +108,10 @@ void Mvee::run(MatrixXd& data, double eps)
     @param delim:char delimiter character
     @param eps:double approximation error (default: 0.001)
 */
-void Mvee::compute(string file, char delim, double eps)
+void Mvee::compute(string file, char delim, double eps, double lmcoeff)
 {
     MatrixXd D = readCSV(file, delim);
-    run(D, eps);
+    khachiyan(D, eps, lmcoeff);
 }
 
 
@@ -119,19 +121,19 @@ void Mvee::compute(string file, char delim, double eps)
     @param delim:char delimiter character
     @param eps:double approximation error (default: 0.001)
 */
-void Mvee::compute(vector<vector<double>>& data, double eps)
+void Mvee::compute(vector<vector<double>>& data, double eps, double lmcoeff)
 {
-    int rows = floor(sizeof(data) / sizeof(data[0]));
-    int cols = floor(sizeof(data[0]) / sizeof(data[0, 0]));
+    int rows = data.size();
+    int cols = data[0].size();
     MatrixXd D(rows, cols);
-    for (int i = 0; i < rows; i++)
+    for (int i=0; i<rows; i++)
     {
-        for (int j = 0; j < cols; j++)
+        for (int j=0; j<cols; j++)
         {
             D(i, j) = data[i][j];
         }
     }
-    run(D, eps);
+    khachiyan(D, eps, lmcoeff);
 }
 
 
@@ -141,17 +143,17 @@ void Mvee::compute(vector<vector<double>>& data, double eps)
     @param delim:char delimiter character
     @param eps:double approximation error (default: 0.001)
 */
-void Mvee::compute(MatrixXd& data, double eps)
+void Mvee::compute(MatrixXd& data, double eps, double lmcoeff)
 {
-    run(data, eps);
+    khachiyan(data, eps, lmcoeff);
 }
 
 
 /*
     Ellipse centroid
     @return centroid:vector<double> (d x 1)
-    Note: Be sure to invoke mveeInstance.compute() prior to 
-            retrieving the ellipse parameters.
+    Note: Invoke mveeInstance.compute() prior to retrieving 
+            the ellipse parameters.
 */
 vector<double> Mvee::centroid()
 {
@@ -162,8 +164,8 @@ vector<double> Mvee::centroid()
 /*
     Ellipse radii
     @return radii:vector<double> (d x 1)
-    Note: Be sure to invoke mveeInstance.compute() prior to 
-            retrieving the ellipse parameters.
+    Note: Invoke mveeInstance.compute() prior to retrieving 
+            the ellipse parameters.
 */
 vector<double> Mvee::radii()
 {
@@ -174,8 +176,8 @@ vector<double> Mvee::radii()
 /*
     Ellipse pose (rotation)
     @return pose:vector<vector<double>> (d x d)
-    Note: Be sure to invoke mveeInstance.compute() prior to 
-            retrieving the ellipse parameters.
+    Note: Invoke mveeInstance.compute() prior to retrieving 
+            the ellipse parameters.
 */
 vector<vector<double>> Mvee::pose()
 {
@@ -186,7 +188,7 @@ vector<vector<double>> Mvee::pose()
 Mvee::~Mvee() {}
 
 
-int main()
+int main(int argc, char **argv)
 {
     return 0;
 }

@@ -31,7 +31,7 @@ private:
 			 	   Eigen::MatrixXd&, 
 			 	   Eigen::MatrixXd&);
 
-	void run(Eigen::MatrixXd&, double);
+	void khachiyan(Eigen::MatrixXd&, double, double);
 
 public:
 	
@@ -47,11 +47,11 @@ public:
 
 	std::vector<std::vector<double>> pose();
 
-	void compute(std::vector<std::vector<double>>&, double);
+	void compute(std::vector<std::vector<double>>&, double, double);
 
-	void compute(Eigen::MatrixXd&, double);
+	void compute(Eigen::MatrixXd&, double, double);
 
-	void compute(std::string, char, double);
+	void compute(std::string, char, double, double);
 
 	~Mvee();
 

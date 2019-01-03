@@ -3,3 +3,7 @@ ref/
 .idea/
 __pycache__/
 build/
+tests/__pycache__/
+tests/results/
+tests/build/
+tests/data/

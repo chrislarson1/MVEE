@@ -20,128 +20,41 @@
 
 
 
-int findMaxIdx(Eigen::VectorXd& vec)
+int findIdx(Eigen::VectorXd& vec, double val)
 {
-    int idx = 0;
-    double max_elem = vec.maxCoeff();
     for (int i=0; i<vec.rows(); i++)
     {
-        if (vec(i) == max_elem) 
+        if (vec(i) == val) 
         { 
-            idx = i; 
-            break;
+			return i;
         }
     }
-    return idx;
+    return -1;
 }
 
 
-void fillvec(std::vector<double> toX,
-			 Eigen::VectorXd& fromX,
-			 unsigned int begin, 
-			 unsigned int end, 
-			 double (*fn)(double x))
+std::vector<double> toStdVec(Eigen::VectorXd& fromX, double (*f)(double))
 {
-	for (int i=begin; i=end; i++)
+	std::vector<double> toX(fromX.size(), 0.);
+	for (int i=0; i<fromX.size(); i++)
 	{
-		toX[i] = (*fn)(fromX(i));
+		toX[i] = (*f)(fromX(i));
 	}
-}
-
-
-std::vector<double> convertVec(Eigen::VectorXd& fromX, double (*fn)(double))
-{
-	unsigned int dim = fromX.rows();
-	unsigned int nthreads = std::thread::hardware_concurrency();
-	std::vector<double> toX(dim, 0.);
-
-	// if (dim < 100)
-	// {
-	// 	fillvec(0, fromX.rows());
-	// }
-	// else
-	// {
-	// 	std::vector<std::future<int>> jobs;
-	// 	for (unsigned int i=0; i<floor(dim / nthreads); i++)
-	// 	{
-	// 		unsigned int n = floor(dim / nthreads);
-	// 		unsigned int N;
-	// 		if (i == nthreads - 1) 
-	// 		{ 
-	// 			N = (unsigned int)n + dim % nthreads; 
-	// 		}
-	// 		else 
-	// 		{ 
-	// 			N = n; 
-	// 		}
-	// 		jobs.push_back(std::async(
-	// 			fillvec((unsigned int)i * n, (unsigned int)i * n + N)
-	// 		));
-	// 	}
-	// 	for (auto job : jobs) 
-	// 	{ 
-	// 		int status = job.get(); 
-	// 	}
-	// }
-
-	fillvec(toX, fromX, 0, fromX.rows(), *fn);
-
 	return toX;
 }
 
-void fillmat(std::vector<std::vector<double>> toX, 
-			 Eigen::MatrixXd& fromX,
-			 unsigned int row, 
-			 unsigned int begin, 
-			 unsigned int end, 
-			 double (*fn)(double))
-{
-	for (int i=begin; i=end; i++)
-	{
-		toX[row][i] = (*fn)(fromX(row, i));
-	}
-}
 
-std::vector<std::vector<double>> convertMat(Eigen::MatrixXd& fromX, double (*fn)(double))
+std::vector<std::vector<double>> toStdMat(Eigen::MatrixXd& fromX, double (*f)(double))
 {
-	std::pair<int, int> dim = std::make_pair(fromX.rows(), fromX.cols());
-	unsigned int nthreads = std::thread::hardware_concurrency();
-	std::vector<std::vector<double>> toX(dim.first, std::vector<double>(dim.second, 0.));
-	
-	// if (dim < 100)
-	// {
-	// 	fillvec(0, fromX.rows());
-	// }
-	// else
-	// {
-	// 	std::vector<std::future<int>> jobs;
-	// 	for (unsigned int i=0; i<floor(dim / nthreads); i++)
-	// 	{
-	// 		unsigned int n = floor(dim / nthreads);
-	// 		unsigned int N;
-	// 		if (i == nthreads - 1) 
-	// 		{ 
-	// 			N = (unsigned int)n + dim % nthreads; 
-	// 		}
-	// 		else 
-	// 		{ 
-	// 			N = n; 
-	// 		}
-	// 		jobs.push_back(std::async(
-	// 			fillvec((unsigned int)i * n, (unsigned int)i * n + N)
-	// 		));
-	// 	}
-	// 	for (auto job : jobs) 
-	// 	{ 
-	// 		int status = job.get(); 
-	// 	}
-	// }
-
-	for (int i=0; i < dim.first; i++)
+	std::vector<std::vector<double>> 
+	toX(fromX.rows(), std::vector<double>(fromX.cols(), 0.));
+	for (int i=0; i<fromX.rows(); i++)
 	{
-		fillmat(toX, fromX, i, 0, fromX.cols(), *fn);
+		for (int j=0; j<fromX.cols(); j++)
+		{
+			toX[i][j] = (*f)(fromX(i, j));
+		}
 	}
-	
 	return toX;
 }
 
@@ -159,9 +72,15 @@ Eigen::MatrixXd readCSV(std::string file, char delim)
 		while(!in.eof()) 
 		{
 			getline(in, s);
-			rows++;
+			if (s != "")
+			{
+				rows++;
+				if (!cols)
+				{
+					cols = count(s.begin(), s.end(), delim) + 1;
+				} 
+			}
 		}
-		cols = count(s.begin(), s.end(), delim);
 	}
 	else
 	{
@@ -169,6 +88,7 @@ Eigen::MatrixXd readCSV(std::string file, char delim)
 	}
 	in.close();
 	
+
 	// Stream file into Eigen::MatrixXd container
 	std::string line;
 	Eigen::MatrixXd X = Eigen::MatrixXd(rows, cols);
@@ -181,12 +101,12 @@ Eigen::MatrixXd readCSV(std::string file, char delim)
 		int len = line.length();
 		col = 0;
 		char* start = ptr;
-		for (int i = 0; i < len; i++) 
+		for (int i=0; i<len; i++) 
 		{
 			if (ptr[i] == delim) 
 			{
-			  X(row, col++) = atof(start);
-			  start = ptr + i + 1;
+				X(row, col++) = atof(start);
+				start = ptr + i + 1;
 			}
 		}
 		X(row, col) = atof(start);

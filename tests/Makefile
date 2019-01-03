@@ -6,11 +6,11 @@ ROOTDIR := $(shell pwd)
 BUILDDIR := $(ROOTDIR)/build
 
 # EXECUTABLE
-EXECUTABLE := $(BUILDDIR)/testmvee
+EXECUTABLE := $(BUILDDIR)/test
 
 # COMPILER FLAGS
 CXX := gcc
-CXXFLAGS := --std=c++11 -o0
+CXXFLAGS := --std=c++11 -o0 -g
 LDFLAGS := \
 -L/usr/lib \
 -L/usr/local/lib \
