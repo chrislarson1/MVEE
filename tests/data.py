@@ -76,9 +76,9 @@ def gen_multimodal_data():
 
 
 def gen_multivariate_data():
-    mu  = np.random.uniform(0, 5, size=128)
-    cov = np.diag(np.array([np.random.randint(1, 4) for _ in range(128)]))
-    data = np.random.multivariate_normal(mu, cov, 500)
+    mu  = np.random.uniform(0, 5, size=500)
+    cov = np.diag(np.array([np.random.randint(1, 4) for _ in range(500)]))
+    data = np.random.multivariate_normal(mu, cov, 5000)
     np.random.shuffle(data)
     fname = os.path.join(PATH, "multivariate.csv")
     np.savetxt(fname, data, delimiter=",", newline="\n")
@@ -89,10 +89,10 @@ def gen_outlier_data():
     cov1 = [[0.1, 0.0],
             [0.0, 0.1]]
     x1 = np.random.multivariate_normal(mu1, cov1, 500)
-    mu2  =  [3.00, 3.00]
+    mu2  =  [0.50, -1.0]
     cov2 = [[0.01, 0.00],
             [0.00, 0.50]]
-    x2 = np.random.multivariate_normal(mu2, cov2, 10)
+    x2 = np.random.multivariate_normal(mu2, cov2, 50)
     data = np.concatenate((x1, x2), axis=0)
     np.random.shuffle(data)
     fname = os.path.join(PATH, "outlier.csv")
