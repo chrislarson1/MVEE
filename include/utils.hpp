@@ -1,7 +1,7 @@
 /*
-    utils.cpp
+    utils.hpp
     Desc: Utility functions for mvee library
-    @author Chris Larson 
+    @author Chris Larson, Cornell University
     @date (2017)
     @version 1.0
 */

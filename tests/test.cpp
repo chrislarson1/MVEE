@@ -1,7 +1,7 @@
 /**
     test.cpp
     Desc: tests for mvee class
-    @author Chris Larson 
+    @author Chris Larson, Cornell University
     @date (2017)
     @version 1.0
 **/

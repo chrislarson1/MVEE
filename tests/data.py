@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+
+"""
+    data.py
+    Desc: Computes minimum volume ellipsoid
+    @author Chris Larson, Cornell University
+    @date (2017)
+    @version 1.0
+"""
+
 import os
 import numpy as np
 

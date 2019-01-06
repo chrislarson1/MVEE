@@ -1,7 +1,7 @@
-# MVEE Algorithm
+# Khachiyan's Ellipsoid Method
 Description: A library that finds the minimum volume enclosing ellipsoid (MVEE) over real-valued data.<br/>
 
-Docs comming soon, for now see Makefile, headers, and tests for details on how to use. Only tested on Ubuntu 18.04.<br/>
+Docs comming soon, for now inspect the Makefile, headers, tests for usage details. Tested on x86-64/ubuntu-18.04.<br/>
 
 To install run:
 ```
