@@ -186,9 +186,3 @@ vector<vector<double>> Mvee::pose()
 
 
 Mvee::~Mvee() {}
-
-
-int main(int argc, char **argv)
-{
-    return 0;
-}
